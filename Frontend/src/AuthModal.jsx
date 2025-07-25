@@ -51,6 +51,7 @@ const AuthModal = ({ show, onClose }) => {
                             onChange={(e) => setUsername(e.target.value)}
                             required
                             disabled={authLoading}
+                            autoComplete="username" // Added autocomplete
                         />
                     </div>
                     <div className="form-group">
@@ -61,6 +62,7 @@ const AuthModal = ({ show, onClose }) => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             disabled={authLoading}
+                            autoComplete={isLoginMode ? "current-password" : "new-password"} // Added autocomplete
                         />
                     </div>
                     {!isLoginMode && (
@@ -71,6 +73,7 @@ const AuthModal = ({ show, onClose }) => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={authLoading}
+                                autoComplete="email" // Added autocomplete
                             />
                         </div>
                     )}

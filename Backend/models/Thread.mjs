@@ -42,7 +42,7 @@ const ThreadSchema = new mongoose.Schema({
     }
 });
 
-
+// Pre-save hook to update the 'updatedAt' timestamp
 ThreadSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();

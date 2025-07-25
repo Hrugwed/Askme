@@ -17,102 +17,79 @@ dotenv.config();
 const app = express();
 
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGO_URL; // Use your existing MONGO_URL
-const SESSION_SECRET = process.env.SESSION_SECRET || 'your_super_secret_session_key_please_change_this_in_production'; // IMPORTANT: Set this in your .env!
+const MONGODB_URI = process.env.MONGO_URL; 
+const SESSION_SECRET = process.env.SESSION_SECRET; // IMPORTANT: MUST BE SET IN .env for production
 
 
 app.use(cors({
-    // --- UPDATED CORS ORIGIN HERE ---
+    // Configure origins for all your deployed frontends and local dev
     origin: [
-        'https://askme-1-u8k2.onrender.com', // Keep this for now, if you still have the old Render frontend
-        'https://askme-nine.vercel.app', // Your new Vercel frontend URL
-        'http://localhost:5173' // For local development
+        'https://askme-nine.vercel.app', // Your primary Vercel frontend URL
+        'https://askme-g23zucy8k-hrugweds-projects.vercel.app', // Vercel preview deployments
+        'http://localhost:5173', // Common for Vite dev server
+        'http://localhost:3000'  // If your frontend runs on the same port as backend for some reason
     ],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Ensure all necessary methods are allowed
-    allowedHeaders: ['Content-Type', 'Authorization'] // Ensure necessary headers are allowed
+    credentials: true, // Essential for sending/receiving cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    allowedHeaders: ['Content-Type', 'Authorization'] 
 }));
 
-app.use(express.json());
+app.use(express.json()); // For parsing application/json
 
 app.use(session({
     secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
+    resave: false, // Don't save session if unmodified
+    saveUninitialized: false, // Don't create session until something is stored
     store: MongoStore.create({
         mongoUrl: MONGODB_URI,
-        collectionName: 'sessions',
-        ttl: 14 * 24 * 60 * 60, // Session TTL (e.g., 14 days)
-        autoRemove: 'interval',
-        autoRemoveInterval: 10 // In minutes. Checks every 10 minutes
+        collectionName: 'sessions', // Collection name for sessions in MongoDB
+        ttl: 14 * 24 * 60 * 60, // Session TTL in seconds (e.g., 14 days)
+        autoRemove: 'interval', // Auto-remove expired sessions
+        autoRemoveInterval: 10 // Interval in minutes for auto-removal
     }),
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Set to true in production (HTTPS)
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-site cookies in production
+        maxAge: 1000 * 60 * 60 * 24 * 7, // Cookie expiration time (7 days)
+        httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+        // 'secure' should be true in production (HTTPS) and false for local HTTP development
+        secure: process.env.NODE_ENV === 'production', 
+        // 'sameSite' should be 'none' for cross-site (frontend on Vercel, backend on Render)
+        // and 'lax' for local development
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' 
     }
 }));
 
-// --- CRITICAL DEBUG LOGS: Request and Response Headers ---
-// This middleware will log session details for every incoming request
-// And crucially, it will log all response headers *just before* they are sent by Express.
-app.use((req, res, next) => {
-    console.log('\n--- Request Received ---');
-    console.log('Request URL:', req.originalUrl);
-    console.log('Request Method:', req.method);
-    console.log('Session ID (before Passport):', req.sessionID);
-    console.log('Session (before Passport):', req.session);
-    
-    // Log response headers just before they are sent
-    res.on('finish', () => {
-        console.log('--- Response Headers Sent by Express ---');
-        console.log('Status Code:', res.statusCode);
-        const headers = res.getHeaders();
-        console.log('All Response Headers:', headers);
-        if (headers['set-cookie']) { // Header names are case-insensitive, but getHeaders returns lowercase keys
-            console.log('Set-Cookie header IS present in Express response!');
-        } else {
-            console.log('Set-Cookie header is NOT present in Express response!');
-        }
-    });
-    next();
-});
-// --- END CRITICAL DEBUG LOGS ---
-
-
+// Passport.js middleware
 app.use(passport.initialize());
 app.use(passport.session());
 
-
+// Route handlers
 app.use("/api", chatRoutes);
-
 app.use("/api/auth", authRoutes);
 
-
+// Connect to MongoDB
 const connectToDatabase = async () => {
     try {
         await mongoose.connect(MONGODB_URI);
-        console.log("Connected to MongoDB successfully.");
+        console.log("Backend: Connected to MongoDB successfully.");
     } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
-        process.exit(1);
+        console.error("Backend: Error connecting to MongoDB:", error);
+        process.exit(1); // Exit process if database connection fails
     }
 };
 
-
+// Start the server
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-    console.log("Backend ready to receive requests from frontend.");
-    connectToDatabase();
+    console.log(`Backend: Server is running on http://localhost:${PORT}`);
+    console.log("Backend: Ready to receive requests from frontend.");
+    connectToDatabase(); // Connect to DB when server starts
 });
 
-
+// Basic root route for health check
 app.get('/', (req, res) => {
     res.send('API is running.');
 });
 
-
+// Global error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Something broke on the server!');

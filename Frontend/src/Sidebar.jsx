@@ -3,7 +3,7 @@ import { MyContext } from "./MyContext";
 import { AuthContext } from './AuthContext';
 import { useContext, useEffect, useState } from "react";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
 function Sidebar() {
   const {
@@ -27,7 +27,7 @@ function Sidebar() {
     } else if (!isAuthenticated && !authLoading) {
       setAllThreads([]);
     }
-  }, [isAuthenticated, authLoading, currentThread]);
+  }, [isAuthenticated, authLoading, currentThread]); // currentThread as dependency to re-fetch if changed externally
 
   const getAllThreads = async () => {
     try {
@@ -65,7 +65,7 @@ function Sidebar() {
     setCurrentThread(newThreadId);
     setActiveEllipsis(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/threads/${newThreadId}`, { credentials: 'include' }); // <--- CHANGED HERE
+      const response = await fetch(`${API_BASE_URL}/api/threads/${newThreadId}`, { credentials: 'include' }); 
       if (response.status === 401) {
         setShowAuthModal(true);
         setPrevChats([]);
@@ -112,13 +112,13 @@ function Sidebar() {
           createNewThread();
         }
       } else {
-        await getAllThreads();
+        await getAllThreads(); // Refresh all threads to ensure consistent state
       }
 
       setActiveEllipsis(null);
     } catch (error) {
       console.error("Error deleting thread:", error);
-      alert("Failed to delete chat. Please try again.");
+      alert("Failed to delete chat. Please try again."); // Consider a custom modal instead of alert()
     }
   };
 
@@ -149,7 +149,7 @@ function Sidebar() {
                 <button
                   className="ellipsis-button"
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent parent li click
                     setActiveEllipsis(activeEllipsis === idx ? null : idx);
                   }}
                 >
@@ -160,7 +160,7 @@ function Sidebar() {
               {activeEllipsis === idx && (
                 <div className="dropdown-menu">
                   <button onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent parent li click
                     deleteThread(thread.threadId);
                   }}>Delete</button>
                 </div>

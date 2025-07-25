@@ -8,7 +8,8 @@ import { AuthProvider, AuthContext } from './AuthContext';
 import AuthModal from './AuthModal';
 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+// API_BASE_URL will be read from .env.local locally, and from Vercel env vars in deployment
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
 
 function App() {
@@ -22,16 +23,19 @@ function App() {
 
   const { isAuthenticated, authLoading, user, logout } = useContext(AuthContext);
 
-  
- useEffect(() => {
+  // Effect to manage AuthModal visibility based on authentication status
+  // This will now automatically show the modal if not authenticated after authLoading is false
+  useEffect(() => {
     if (isAuthenticated) {
-        setShowAuthModal(false);
+      setShowAuthModal(false); // Hide modal if user becomes authenticated
     } else {
-        
-        setShowAuthModal(!authLoading && !isAuthenticated);
+      // Show modal if not authenticated AND initial auth check is complete
+      // This makes the modal pop up automatically if a user lands on the page unauthenticated.
+      setShowAuthModal(!authLoading && !isAuthenticated);
     }
-}, [isAuthenticated, authLoading]);
+  }, [isAuthenticated, authLoading]); // Depend on isAuthenticated and authLoading
 
+  // Effect for initializing chat threads
   useEffect(() => {
     const initializeThread = async () => {
       setInitialLoading(true);
@@ -79,6 +83,8 @@ function App() {
       }
     };
 
+    // Only run this effect for initializing threads once authLoading is false
+    // and when isAuthenticated changes.
     if (!authLoading) {
       initializeThread();
     }
@@ -94,23 +100,28 @@ function App() {
     setShowAuthModal // Pass setShowAuthModal down to children
   };
 
-  // // --- IMPROVED STYLING FOR AUTH LOADING ---
-  // if (authLoading) {
-  //   return (
-  //     <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column' }}>
-  //       <div className="spinner-border text-primary" role="status">
-  //         <span className="visually-hidden">Loading...</span>
-  //       </div>
-  //       <p className="mt-3 text-white">Checking authentication status...</p> {/* Added text-white for visibility */}
-  //     </div>
-  //   );
-  // }
+  // If authLoading is true, display a simple loading spinner.
+  // This is a brief state before the isAuthenticated check is finalized.
+  if (authLoading) {
+    return (
+      <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column', backgroundColor: '#282c34', color: 'white' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-3">Loading application...</p>
+      </div>
+    );
+  }
 
   return (
     <div className='App'>
       <MyContext.Provider value={providerValues}>
-        {/* AuthModal is shown based on showAuthModal state */}
-        <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
+        {/* Render AuthModal ONLY if showAuthModal is true */}
+        {showAuthModal && (
+            <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
+        )}
+
+        {/* Always render Sidebar and ChatWindow. Their content will adapt based on isAuthenticated. */}
         <Sidebar />
         <ChatWindow />
       </MyContext.Provider>

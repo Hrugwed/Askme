@@ -1,7 +1,7 @@
 // routes/auth.mjs
 import express from 'express';
 import passport from 'passport';
-import User from '../models/User.mjs'; // Import User model
+import User from '../models/User.mjs'; 
 const router = express.Router();
 
 // @route   POST /api/auth/register
@@ -21,20 +21,21 @@ router.post('/register', async (req, res) => {
         }
 
         user = new User({ username, password, email });
-        await user.save();
+        await user.save(); // User document should now have an _id
 
-        // Optionally log in the user immediately after registration
+        // Log in the user immediately after registration
         req.login(user, (err) => {
             if (err) {
-                console.error("Error logging in after registration:", err);
-                return res.status(500).json({ msg: 'Registration successful, but login failed.' });
+                console.error("Backend: Error logging in after registration:", err);
+                // If login fails, still report registration success but note the login issue
+                return res.status(500).json({ msg: 'Registration successful, but automatic login failed.' });
             }
+            // If login is successful, send success response
             res.status(201).json({ msg: 'User registered and logged in successfully', user: { id: user.id, username: user.username, email: user.email } });
         });
 
     } catch (err) {
-        console.error("Error during user registration:", err);
-        // Handle unique email constraint error more gracefully if email is used
+        console.error("Backend: Error during user registration:", err);
         if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
             return res.status(400).json({ msg: 'Email already registered.' });
         }
@@ -47,60 +48,44 @@ router.post('/register', async (req, res) => {
 // @access  Public
 router.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
-        console.log('Passport.authenticate callback triggered.');
-
         if (err) {
-            console.error('Passport Auth Error (Callback):', err);
+            console.error('Backend: Passport Auth Error (Callback):', err);
             return res.status(500).json({ msg: 'Authentication error.' });
         }
         if (!user) {
-            console.log('Passport Auth Failed (Callback): No user found.', info);
+            console.log('Backend: Passport Auth Failed (Callback): No user found.', info);
             return res.status(401).json({ msg: info.message || 'Invalid credentials.' });
         }
         
-        console.log('req.logIn called.');
         req.logIn(user, (err) => {
             if (err) {
-                console.error('req.logIn Error:', err);
+                console.error('Backend: req.logIn Error:', err);
                 return res.status(500).json({ msg: 'Could not log in user after authentication.' });
             }
             
-            console.log('User successfully logged in (req.logIn success):', user.username);
-            console.log('Session ID (after req.logIn):', req.sessionID);
-            console.log('Session (after req.logIn):', req.session);
-
-            // --- REMOVED EXPLICIT COOKIE SETTING ---
-            // The express-session middleware automatically handles setting the Set-Cookie header
-            // after req.logIn() is called. Explicitly setting it here can interfere.
-            // console.log('Attempting to explicitly set cookie (debug mode)...');
-            // res.cookie('connect.sid', req.sessionID, {
-            //     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-            //     httpOnly: true,
-            //     secure: process.env.NODE_ENV === 'production',
-            //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-            // });
-            // console.log('Explicit cookie set instruction sent.');
-            // --- END REMOVED EXPLICIT COOKIE SETTING ---
-
+            // Session and cookie are now managed by express-session after req.logIn()
             res.status(200).json({ msg: 'Logged in successfully', user: { id: user.id, username: user.username, email: user.email } });
         });
-    })(req, res, next);
+    })(req, res, next); // Ensure passport.authenticate is called
 });
 
 // @route   GET /api/auth/logout
 // @desc    Logout user
 // @access  Private (though publicly accessible to log out)
 router.get('/logout', (req, res, next) => {
+    // req.logout is asynchronous and requires a callback
     req.logout((err) => {
         if (err) {
-            return next(err);
+            console.error("Backend: Error during req.logout:", err);
+            return next(err); // Pass error to Express error handler
         }
-        req.session.destroy((destroyErr) => { // Destroy the session in the store
+        // Destroy the session in the store and clear the cookie
+        req.session.destroy((destroyErr) => { 
             if (destroyErr) {
-                console.error("Error destroying session:", destroyErr);
+                console.error("Backend: Error destroying session:", destroyErr);
                 return res.status(500).json({ msg: "Failed to destroy session" });
             }
-            res.clearCookie('connect.sid'); // Clear the session cookie
+            res.clearCookie('connect.sid'); // Clear the session cookie from the browser
             res.json({ msg: 'Logged out successfully' });
         });
     });

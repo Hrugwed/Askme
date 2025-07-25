@@ -2,9 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 export const AuthContext = createContext();
 
-// Ensure API_BASE_URL does NOT have a trailing slash
-// If VITE_API_BASE_URL is 'http://localhost:3000/' it will be trimmed to 'http://localhost:3000'
-// If VITE_API_BASE_URL is 'https://askme-4r17.onrender.com/' it will be trimmed
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
 
@@ -15,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const checkAuthStatus = async () => {
-            console.log('Frontend: Checking authentication status...');
+            console.log('Frontend: Checking authentication status... (AuthContext)');
             const fetchUrl = `${API_BASE_URL}/api/auth/current_user`;
             console.log('Frontend: Fetching current_user from URL:', fetchUrl); // Added URL logging
             try {
@@ -48,12 +46,12 @@ export const AuthProvider = ({ children }) => {
         };
 
         checkAuthStatus();
-    }, []); // Empty dependency array means this runs once on mount
+    }, []); 
 
     const login = async (username, password) => {
         setAuthLoading(true);
-        const fetchUrl = `${API_BASE_URL}/api/auth/login`; // Added URL for login
-        console.log('Frontend: Fetching login from URL:', fetchUrl); // Added URL logging
+        const fetchUrl = `${API_BASE_URL}/api/auth/login`; 
+        console.log('Frontend: Sending login request to URL:', fetchUrl); // Log login URL
         try {
             const response = await fetch(fetchUrl, {
                 method: 'POST',
@@ -65,12 +63,14 @@ export const AuthProvider = ({ children }) => {
             if (response.ok) {
                 setUser(data.user);
                 setIsAuthenticated(true);
+                console.log('Frontend: Login successful.'); // Log successful login
                 return { success: true, message: data.msg };
             } else {
+                console.log('Frontend: Login failed, response:', data.msg); // Log failed login
                 return { success: false, message: data.msg || 'Login failed' };
             }
         } catch (error) {
-            console.error('Login error:', error);
+            console.error('Frontend: Login error:', error);
             return { success: false, message: 'Network error or server unavailable.' };
         } finally {
             setAuthLoading(false);
@@ -79,8 +79,8 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (username, password, email) => {
         setAuthLoading(true);
-        const fetchUrl = `${API_BASE_URL}/api/auth/register`; // Added URL for register
-        console.log('Frontend: Fetching register from URL:', fetchUrl); // Added URL logging
+        const fetchUrl = `${API_BASE_URL}/api/auth/register`;
+        console.log('Frontend: Sending register request to URL:', fetchUrl); // Log register URL
         try {
             const response = await fetch(fetchUrl, {
                 method: 'POST',
@@ -92,12 +92,14 @@ export const AuthProvider = ({ children }) => {
             if (response.ok) {
                 setUser(data.user);
                 setIsAuthenticated(true);
+                console.log('Frontend: Registration successful.'); 
                 return { success: true, message: data.msg };
             } else {
+                console.log('Frontend: Registration failed, response:', data.msg); 
                 return { success: false, message: data.msg || 'Registration failed' };
             }
         } catch (error) {
-            console.error('Registration error:', error);
+            console.error('Frontend: Registration error:', error);
             return { success: false, message: 'Network error or server unavailable.' };
         } finally {
             setAuthLoading(false);
@@ -106,8 +108,8 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         setAuthLoading(true);
-        const fetchUrl = `${API_BASE_URL}/api/auth/logout`; // Added URL for logout
-        console.log('Frontend: Fetching logout from URL:', fetchUrl); // Added URL logging
+        const fetchUrl = `${API_BASE_URL}/api/auth/logout`;
+        console.log('Frontend: Sending logout request to URL:', fetchUrl); 
         try {
             const response = await fetch(fetchUrl, {
                 method: 'GET',
@@ -116,12 +118,14 @@ export const AuthProvider = ({ children }) => {
             if (response.ok) {
                 setUser(null);
                 setIsAuthenticated(false);
+                console.log('Frontend: Logout successful.'); 
                 return { success: true, message: 'Logged out successfully' };
             } else {
+                console.log('Frontend: Logout failed.'); 
                 return { success: false, message: 'Logout failed' };
             }
         } catch (error) {
-            console.error('Logout error:', error);
+            console.error('Frontend: Logout error:', error);
             return { success: false, message: 'Network error or server unavailable.' };
         } finally {
             setAuthLoading(false);

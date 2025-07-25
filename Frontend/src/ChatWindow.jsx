@@ -5,7 +5,7 @@ import { MyContext } from './MyContext';
 import { AuthContext } from './AuthContext';
 import 'react-loading-skeleton/dist/skeleton.css';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
 function ChatWindow() {
   const { message, setMessage, currentThread, setCurrentThread, setPrevChats, initialLoading, setAllThreads, setShowAuthModal } = useContext(MyContext);
@@ -22,7 +22,7 @@ function ChatWindow() {
       setMessage("");
       setShowUserDropdown(false);
     } else {
-      alert(result.message);
+      alert(result.message); // Consider a custom modal instead of alert() for better UX
     }
   };
 
@@ -57,7 +57,7 @@ function ChatWindow() {
       if (response.status === 401) {
         setShowAuthModal(true);
         setIsLoading(false);
-        setPrevChats(prev => prev.slice(0, prev.length - 2));
+        setPrevChats(prev => prev.slice(0, prev.length - 2)); // Remove user message and skeleton
         return;
       }
 
