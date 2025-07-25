@@ -1,0 +1,299 @@
+/* src/ChatWindow.css - FULLY UPDATED TO MATCH YOUR THEME */
+
+.chat-window {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: white; /* Main window background */
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Header */
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: #f9f9f9; /* Light background, consistent with sidebar header */
+    border-bottom: 1px solid #e0e0e0; /* Light border, consistent with sidebar */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.chat-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333; /* Dark text */
+}
+
+/* User Authentication Section (Sign In/Register button, User Info, Dropdown) */
+.user-auth-section {
+    position: relative;
+    font-family: "Segoe UI", sans-serif;
+    display: flex; /* To align button/user info */
+    align-items: center;
+}
+
+.user-info {
+    cursor: pointer;
+    background-color: white; /* White background, consistent with sidebar items */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 10px; /* Consistent with sidebar button/list items */
+    padding: 8px 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333; /* Dark text */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.user-info:hover {
+    background-color: #f0f0f0; /* Light hover background, from new chat button hover */
+    border-color: #c0c0c0;
+}
+
+.user-info .fa-caret-down {
+    font-size: 0.8em;
+    color: #888; /* Softer color for icon */
+}
+
+.auth-button {
+    background-color: #ffd43b; /* PRIMARY YELLOW FOR AUTH BUTTON */
+    color: #000; /* Black text on yellow for contrast */
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px; /* Consistent with sidebar items */
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.auth-button:hover {
+    background-color: #ffc800; /* Darker yellow on hover */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.auth-button:active {
+    background-color: #e6b800; /* Even darker on active */
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background-color: #ffffff; /* White background */
+    border: 1px solid #e0e0e0; /* Light border */
+    border-radius: 10px; /* Consistent border-radius */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+    padding: 8px 0;
+    z-index: 10;
+    min-width: 150px;
+    overflow: hidden;
+}
+
+.user-dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    background: none;
+    border: none;
+    color: #333; /* Dark text */
+    text-align: left;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 400;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.user-dropdown-menu button:hover {
+    background-color: #f0f0f0; /* Light hover background */
+    color: #ffd43b; /* Yellow highlight on hover for text buttons */
+}
+
+.welcome-message {
+    text-align: center;
+    color: #777777; /* Softer gray text */
+    font-size: 1.2rem;
+    margin-top: 80px;
+    font-family: "Segoe UI", sans-serif;
+    line-height: 1.5;
+}
+
+/* Chat Content Area */
+.chat-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    background-color: white; /* Main chat background */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center chat messages horizontally */
+    scroll-behavior: smooth;
+    padding: 20px 0 100px 0; /* Add bottom padding to prevent input overlap */
+    box-sizing: border-box;
+}
+
+/* This .chat-inner seems to be redundant if .chat-content is already flex column and centering items.
+   If you use it, ensure it's within the flow of .chat-content.
+.chat-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+*/
+
+.chat-message-wrapper {
+    width: 100%;
+    max-width: 700px; /* Max width for chat messages */
+    padding: 8px 16px; /* Padding around each message wrapper */
+    box-sizing: border-box;
+}
+
+.chat-message-wrapper + .chat-message-wrapper {
+    margin-top: 8px; /* Spacing between messages */
+}
+
+
+/* Input section */
+.chat-input-section {
+    height: auto; /* Allow height to adjust based on content, but min-height is better */
+    min-height: 80px; /* A good minimum height for the input area */
+    width: 70%; /* Centered width */
+    max-width: 700px; /* Match chat message max-width for alignment */
+    display: flex;
+    align-items: center; /* Align input and button vertically */
+    padding: 10px 16px;
+    border-top: 1px solid #e0e0e0; /* Light border at the top */
+    background-color: white; /* White background */
+    align-self: center; /* Center the input section */
+    box-sizing: border-box;
+    position: sticky; /* Stick to the bottom */
+    bottom: 0; /* Position at the bottom */
+    z-index: 100; /* Ensure it's above chat content */
+}
+
+
+.chat-input {
+    flex-grow: 1;
+    min-height: 36px;
+    max-height: 120px; /* Limit the growing height */
+    height: 4rem; /* Initial height */
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 20px; /* Rounded corners */
+    border: none; /* No border */
+    outline: none; /* No outline on focus */
+    resize: none; /* Disable manual resize */
+    background-color: rgb(233, 233, 233); /* Light gray background, consistent with your chat.css */
+    overflow-y: auto;
+    line-height: 1.4;
+    align-self: center;
+    color: #333; /* Dark text color */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Subtle inner shadow */
+    transition: box-shadow 0.2s ease;
+}
+
+
+.chat-input:focus {
+    border-color: transparent; /* No border on focus */
+    box-shadow: 0 0 0 2px #ffd43b, inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Yellow outline + inner shadow */
+}
+
+.send-button {
+    position: relative;
+    overflow: hidden; /* needed for ripple effect */
+    margin-left: 12px;
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #ffd43b; /* PRIMARY YELLOW */
+    color: #000; /* Black text for contrast */
+    border: none; /* No border */
+    border-radius: 3rem; /* Very rounded */
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    user-select: none;
+    align-self: center;
+}
+
+.send-button:hover {
+    background-color: #ffc800; /* Darker yellow on hover */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow on hover */
+}
+
+.send-button:active {
+    background-color: #e6b800; /* Even darker on active */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); /* Inner shadow on click */
+}
+
+/* Ripple effect (keep as is if you have JS for it) */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-animation 600ms linear;
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+@keyframes ripple-animation {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Skeleton loader styles (from your provided snippet) */
+.ai-response-skeleton-inline {
+    width: 95%;
+    max-width: 600px;
+    margin: 0 auto 10px auto;
+    padding: 8px 15px;
+    border-radius: 18px;
+    background-color: #f1f0f0; /* Use model message background color */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-self: flex-start; /* Align to left like model messages */
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* Consistent with message shadows, but lighter */
+}
+
+.ai-response-skeleton-inline .react-loading-skeleton {
+    width: 100% !important;
+    line-height: 1.2;
+}
+
+.ai-response-skeleton-inline .skeleton-title {
+    width: 70% !important;
+}
+.ai-response-skeleton-inline .skeleton-text-line {
+    width: 90% !important;
+}
+.ai-response-skeleton-inline .skeleton-last-line {
+    width: 40% !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Additional styles for the "Start a New Chat!" heading in Chat.jsx */
+.start-new-chat-heading {
+    text-align: center;
+    font-size: 1.8rem; /* Larger and more prominent */
+    margin-top: 50px; /* Space from top */
+    color: #333; /* Dark text */
+    font-weight: 600;
+    opacity: 0.8; /* Slightly subdued */
+    font-family: "Segoe UI", sans-serif;
+}

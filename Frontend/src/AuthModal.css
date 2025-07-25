@@ -1,0 +1,136 @@
+/* src/AuthModal.css - UPDATED WITH YELLOW BUTTONS */
+
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay to dim background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.auth-modal-content {
+    background: #ffffff; /* White background, consistent with chat and sidebar elements */
+    padding: 30px;
+    border-radius: 12px; /* Consistent with sidebar button/list items */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); /* Soft shadow, similar to messages */
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    color: #333333; /* Dark text for readability */
+    font-family: "Segoe UI", sans-serif; /* Consistent font */
+    box-sizing: border-box;
+}
+
+.auth-modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #888888; /* Softer color for close button */
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.auth-modal-close-btn:hover {
+    color: #555555;
+}
+
+.auth-modal-content h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #333333; /* Dark title for consistency */
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.auth-error {
+    color: #e74c3c; /* Standard red for errors */
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 500;
+    background-color: #ffebeb; /* Light red background for error message */
+    border: 1px solid #e74c3c;
+    border-radius: 8px; /* Consistent rounded corners */
+    padding: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555555; /* Softer dark for labels */
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #cccccc; /* Light border for inputs */
+    border-radius: 8px; /* Consistent rounded corners */
+    background-color: #f8f8f8; /* Very light background for inputs */
+    color: #333333;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    border-color: #ffd43b; /* Yellow focus border */
+    box-shadow: 0 0 0 3px rgba(255, 212, 59, 0.4); /* Yellow glow */
+    outline: none;
+}
+
+.auth-modal-content button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    background-color: #ffd43b; /* PRIMARY YELLOW FOR BUTTONS */
+    color: #000; /* Black text on yellow for contrast */
+    border: none;
+    border-radius: 10px; /* Consistent with sidebar list items */
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.auth-modal-content button[type="submit"]:hover:not(:disabled) {
+    background-color: #ffc800; /* Slightly darker yellow on hover */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.auth-modal-content button[type="submit"]:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    box-shadow: none;
+    color: #888; /* Make disabled text a bit clearer */
+}
+
+.toggle-mode {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.95rem;
+    color: #777777; /* Softer text color */
+}
+
+.toggle-mode span {
+    color: #ffd43b; /* Yellow for the clickable toggle link */
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.toggle-mode span:hover {
+    color: #ffc800; /* Darker yellow on hover */
+    text-decoration: underline;
+}

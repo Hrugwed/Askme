@@ -1,0 +1,144 @@
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 70%;
+  margin: 0 auto;
+  padding: 20px 20px 100px 20px; /* bottom padding to avoid overlapping */
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+  background-color: #fff;
+  color: #000;
+  flex-grow: 1;
+   color: #000;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  
+}
+
+/* WebKit-based browsers (Chrome, Edge, Safari) */
+.chat::-webkit-scrollbar {
+  width: 8px; /* Slim scrollbar */
+  display: none;
+}
+
+.chat::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.user-chat-box,
+.model-chat-box {
+  display: flex;
+  width: 100%;
+}
+
+.user-chat-box {
+  justify-content: flex-end;
+}
+
+.model-chat-box {
+  justify-content: flex-start;
+}
+
+.user-message,
+.model-message {
+  max-width: 80%;
+  padding: 14px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  color: #000;
+}
+
+/* User Message (Yellow) */
+.user-message {
+  background-color: #ffd43b;
+  color: #000;
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 20px;
+}
+
+/* Model Message (Light Gray) */
+.model-message {
+  background-color: #f1f0f0;
+  color: #000;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 20px;
+}
+
+/* Inline code */
+.model-message code {
+  background-color: #eeeeee;
+  color: #d6336c;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+}
+
+/* Code Block */
+.model-message pre {
+  background-color: #f9f9f9;
+  color: #000;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+  margin: 1rem 0;
+  border: 1px solid #ddd;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.model-message pre code {
+  background: transparent;
+  padding: 0;
+  color: #000;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 10px;
+  color: #333;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 12px;
+  max-width: 90%;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.user {
+  background-color: #e0f7fa;
+  align-self: flex-end;
+}
+
+.ai {
+  background-color: #f1f1f1;
+  align-self: flex-start;
+}
