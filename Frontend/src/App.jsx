@@ -18,9 +18,19 @@ function App() {
   const [prevChats, setPrevChats] = useState([]);
   const [allThreads, setAllThreads] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false); // State for auth modal
 
   const { isAuthenticated, authLoading, user, logout } = useContext(AuthContext);
+
+  
+ useEffect(() => {
+    if (isAuthenticated) {
+        setShowAuthModal(false);
+    } else {
+        
+        setShowAuthModal(!authLoading && !isAuthenticated);
+    }
+}, [isAuthenticated, authLoading]);
 
   useEffect(() => {
     const initializeThread = async () => {
@@ -69,7 +79,7 @@ function App() {
       }
     };
 
-    if (!authLoading) { 
+    if (!authLoading) {
       initializeThread();
     }
   }, [isAuthenticated, authLoading]);
@@ -81,17 +91,25 @@ function App() {
     prevChats, setPrevChats,
     allThreads, setAllThreads,
     initialLoading,
-    setShowAuthModal
+    setShowAuthModal // Pass setShowAuthModal down to children
   };
 
- 
+  // --- IMPROVED STYLING FOR AUTH LOADING ---
   if (authLoading) {
-    return <div className='App'><p>Checking authentication status...</p></div>;
+    return (
+      <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-3 text-white">Checking authentication status...</p> {/* Added text-white for visibility */}
+      </div>
+    );
   }
 
   return (
     <div className='App'>
       <MyContext.Provider value={providerValues}>
+        {/* AuthModal is shown based on showAuthModal state */}
         <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
         <Sidebar />
         <ChatWindow />
