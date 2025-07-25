@@ -32,7 +32,7 @@ app.use(cors({
 }));
 
 app.use(express.json()); // For parsing application/json
-app.use(cookieParser());
+
 
 app.use(session({
     secret: SESSION_SECRET,
@@ -57,6 +57,7 @@ app.use(session({
 }));
 
 // Passport.js middleware
+app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
 

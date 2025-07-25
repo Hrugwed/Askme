@@ -1,10 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import axios from 'axios'; // Import axios
 
 export const AuthContext = createContext();
 
-
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
-
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -13,65 +12,53 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const checkAuthStatus = async () => {
-            console.log('Frontend: Checking authentication status... (AuthContext)');
-            const fetchUrl = `${API_BASE_URL}/api/auth/current_user`;
-            console.log('Frontend: Fetching current_user from URL:', fetchUrl); // Added URL logging
             try {
-                const response = await fetch(fetchUrl, { 
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include'
+                // Use axios.get for GET requests
+                const response = await axios.get(`${API_BASE_URL}/api/auth/current_user`, {
+                    withCredentials: true // Equivalent to credentials: 'include'
                 });
-                console.log('Frontend: current_user response status:', response.status);
-                const data = await response.json();
-                console.log('Frontend: current_user response data:', data);
 
-                if (response.ok && data.user) {
-                    setUser(data.user);
+                // Axios wraps the response in a 'data' property
+                if (response.status === 200 && response.data.user) {
+                    setUser(response.data.user);
                     setIsAuthenticated(true);
-                    console.log('Frontend: User is authenticated.');
                 } else {
                     setUser(null);
                     setIsAuthenticated(false);
-                    console.log('Frontend: User is NOT authenticated.');
                 }
             } catch (error) {
-                console.error('Frontend: Error checking auth status:', error);
+                // Axios errors have a .response property for server responses
+                console.error('Frontend: Error checking auth status:', error.response ? error.response.data : error.message);
                 setUser(null);
                 setIsAuthenticated(false);
             } finally {
                 setAuthLoading(false);
-                console.log('Frontend: Auth status check finished.');
             }
         };
 
         checkAuthStatus();
-    }, []); 
+    }, []);
 
     const login = async (username, password) => {
         setAuthLoading(true);
-        const fetchUrl = `${API_BASE_URL}/api/auth/login`; 
-        console.log('Frontend: Sending login request to URL:', fetchUrl); // Log login URL
         try {
-            const response = await fetch(fetchUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
-                credentials: 'include'
+            // Use axios.post for POST requests
+            const response = await axios.post(`${API_BASE_URL}/api/auth/login`, { username, password }, {
+                withCredentials: true // Equivalent to credentials: 'include'
             });
-            const data = await response.json();
-            if (response.ok) {
-                setUser(data.user);
+
+            if (response.status === 200) {
+                setUser(response.data.user);
                 setIsAuthenticated(true);
-                console.log('Frontend: Login successful.'); // Log successful login
-                return { success: true, message: data.msg };
+                return { success: true, message: response.data.msg };
             } else {
-                console.log('Frontend: Login failed, response:', data.msg); // Log failed login
-                return { success: false, message: data.msg || 'Login failed' };
+                // This block might not be reached if axios throws on non-2xx status
+                return { success: false, message: response.data.msg || 'Login failed' };
             }
         } catch (error) {
-            console.error('Frontend: Login error:', error);
-            return { success: false, message: 'Network error or server unavailable.' };
+            console.error('Frontend: Login error:', error.response ? error.response.data : error.message);
+            // Axios automatically throws for 4xx/5xx responses, so we handle it here
+            return { success: false, message: error.response?.data?.msg || 'Login failed' };
         } finally {
             setAuthLoading(false);
         }
@@ -79,28 +66,23 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (username, password, email) => {
         setAuthLoading(true);
-        const fetchUrl = `${API_BASE_URL}/api/auth/register`;
-        console.log('Frontend: Sending register request to URL:', fetchUrl); // Log register URL
         try {
-            const response = await fetch(fetchUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, email }),
-                credentials: 'include'
+            // Use axios.post for POST requests
+            const response = await axios.post(`${API_BASE_URL}/api/auth/register`, { username, password, email }, {
+                withCredentials: true // Equivalent to credentials: 'include'
             });
-            const data = await response.json();
-            if (response.ok) {
-                setUser(data.user);
+
+            if (response.status === 201) { // Assuming 201 for successful registration
+                setUser(response.data.user);
                 setIsAuthenticated(true);
-                console.log('Frontend: Registration successful.'); 
-                return { success: true, message: data.msg };
+                return { success: true, message: response.data.msg };
             } else {
-                console.log('Frontend: Registration failed, response:', data.msg); 
-                return { success: false, message: data.msg || 'Registration failed' };
+                // This block might not be reached if axios throws on non-2xx status
+                return { success: false, message: response.data.msg || 'Registration failed' };
             }
         } catch (error) {
-            console.error('Frontend: Registration error:', error);
-            return { success: false, message: 'Network error or server unavailable.' };
+            console.error('Frontend: Registration error:', error.response ? error.response.data : error.message);
+            return { success: false, message: error.response?.data?.msg || 'Registration failed' };
         } finally {
             setAuthLoading(false);
         }
@@ -108,25 +90,23 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         setAuthLoading(true);
-        const fetchUrl = `${API_BASE_URL}/api/auth/logout`;
-        console.log('Frontend: Sending logout request to URL:', fetchUrl); 
         try {
-            const response = await fetch(fetchUrl, {
-                method: 'GET',
-                credentials: 'include'
+            // Use axios.get for GET requests
+            const response = await axios.get(`${API_BASE_URL}/api/auth/logout`, {
+                withCredentials: true // Equivalent to credentials: 'include'
             });
-            if (response.ok) {
+
+            if (response.status === 200) {
                 setUser(null);
                 setIsAuthenticated(false);
-                console.log('Frontend: Logout successful.'); 
-                return { success: true, message: 'Logged out successfully' };
+                return { success: true, message: response.data.msg };
             } else {
-                console.log('Frontend: Logout failed.'); 
-                return { success: false, message: 'Logout failed' };
+                // This block might not be reached if axios throws on non-2xx status
+                return { success: false, message: response.data.msg || 'Logout failed' };
             }
         } catch (error) {
-            console.error('Frontend: Logout error:', error);
-            return { success: false, message: 'Network error or server unavailable.' };
+            console.error('Frontend: Logout error:', error.response ? error.response.data : error.message);
+            return { success: false, message: error.response?.data?.msg || 'Network error or server unavailable.' };
         } finally {
             setAuthLoading(false);
         }

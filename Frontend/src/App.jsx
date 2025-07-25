@@ -6,6 +6,7 @@ import { MyContext } from './MyContext';
 import { useState, useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import AuthModal from './AuthModal';
+import axios from 'axios'; // Import axios
 
 
 // API_BASE_URL will be read from .env.local locally, and from Vercel env vars in deployment
@@ -48,17 +49,20 @@ function App() {
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/threads`, { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
+        // Use axios.get for fetching threads
+        const response = await axios.get(`${API_BASE_URL}/api/threads`, { withCredentials: true });
+        
+        if (response.status === 200) { // Check for 200 OK status
+          const data = response.data; // Axios response data is directly in .data
           setAllThreads(data);
 
           if (data.length > 0) {
             const latestThread = data.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
             setCurrentThread(latestThread.threadId);
-            const messagesResponse = await fetch(`${API_BASE_URL}/api/threads/${latestThread.threadId}`, { credentials: 'include' });
-            if (messagesResponse.ok) {
-              const messagesData = await messagesResponse.json();
+            // Use axios.get for fetching messages for a specific thread
+            const messagesResponse = await axios.get(`${API_BASE_URL}/api/threads/${latestThread.threadId}`, { withCredentials: true });
+            if (messagesResponse.status === 200) { // Check for 200 OK status
+              const messagesData = messagesResponse.data; // Axios response data
               setPrevChats(messagesData);
             } else {
               console.warn(`Could not load messages for latest thread ${latestThread.threadId}. Starting new chat.`);
@@ -70,12 +74,17 @@ function App() {
             setPrevChats([]);
           }
         } else {
+          // This block might not be reached if axios throws on non-2xx status
           console.error("Failed to fetch all threads on initial load or not authenticated.");
           setCurrentThread("");
           setPrevChats([]);
         }
       } catch (err) {
-        console.error("Error during initial thread fetch:", err);
+        console.error("Error during initial thread fetch:", err.response ? err.response.data : err.message);
+        // Handle 401 specifically if needed, otherwise general error
+        if (err.response && err.response.status === 401) {
+            setShowAuthModal(true); // Show auth modal on 401
+        }
         setCurrentThread("");
         setPrevChats([]);
       } finally {

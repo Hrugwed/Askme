@@ -2,6 +2,7 @@ import "./Sidebar.css";
 import { MyContext } from "./MyContext";
 import { AuthContext } from './AuthContext';
 import { useContext, useEffect, useState } from "react";
+import axios from 'axios'; // Import axios
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
@@ -27,20 +28,25 @@ function Sidebar() {
     } else if (!isAuthenticated && !authLoading) {
       setAllThreads([]);
     }
-  }, [isAuthenticated, authLoading, currentThread]); // currentThread as dependency to re-fetch if changed externally
+  }, [isAuthenticated, authLoading, currentThread]);
 
   const getAllThreads = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/threads`, { credentials: 'include' }); 
-      if (response.status === 401) {
+      // Use axios.get for fetching threads
+      const response = await axios.get(`${API_BASE_URL}/api/threads`, { withCredentials: true }); 
+      
+      if (response.status === 200) { // Check for 200 OK status
+        const data = response.data; // Axios response data is directly in .data
+        setAllThreads(data);
+      } else if (response.status === 401) { // Explicitly handle 401 if axios doesn't throw
         setShowAuthModal(true);
         setAllThreads([]);
-        return;
       }
-      const data = await response.json();
-      setAllThreads(data);
     } catch (error) {
-      console.error("Error fetching threads: " + error);
+      console.error("Error fetching threads: " + (error.response ? error.response.data : error.message));
+      if (error.response && error.response.status === 401) {
+        setShowAuthModal(true);
+      }
       setAllThreads([]);
     }
   };
@@ -65,18 +71,23 @@ function Sidebar() {
     setCurrentThread(newThreadId);
     setActiveEllipsis(null);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/threads/${newThreadId}`, { credentials: 'include' }); 
-      if (response.status === 401) {
+      // Use axios.get for changing threads
+      const response = await axios.get(`${API_BASE_URL}/api/threads/${newThreadId}`, { withCredentials: true });
+      
+      if (response.status === 200) { // Check for 200 OK status
+        const data = response.data; // Axios response data
+        setPrevChats(data);
+        setChat(null);
+      } else if (response.status === 401) { // Explicitly handle 401 if axios doesn't throw
         setShowAuthModal(true);
         setPrevChats([]);
         setCurrentThread("");
-        return;
       }
-      const data = await response.json();
-      setPrevChats(data);
-      setChat(null);
     } catch (error) {
-      console.error("Error loading thread:", error);
+      console.error("Error loading thread:", error.response ? error.response.data : error.message);
+      if (error.response && error.response.status === 401) {
+        setShowAuthModal(true);
+      }
       setPrevChats([]);
       setCurrentThread("");
     }
@@ -88,37 +99,39 @@ function Sidebar() {
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/threads/${threadIdToDelete}`, { 
-        method: "DELETE",
-        credentials: 'include'
+      // Use axios.delete for deleting threads
+      const response = await axios.delete(`${API_BASE_URL}/api/threads/${threadIdToDelete}`, { 
+        withCredentials: true
       });
-      if (response.status === 401) {
+      
+      if (response.status === 200) { // Check for 200 OK status
+        const updatedThreads = allThreads.filter((thread) => thread.threadId !== threadIdToDelete);
+        setAllThreads(updatedThreads);
+
+        if (threadIdToDelete === currentThread) {
+          if (updatedThreads.length > 0) {
+            const latestThread = updatedThreads.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+            setCurrentThread(latestThread.threadId);
+            await changeThread(latestThread.threadId);
+          } else {
+            createNewThread();
+          }
+        } else {
+          await getAllThreads(); // Refresh all threads to ensure consistent state
+        }
+        setActiveEllipsis(null);
+      } else if (response.status === 401) { // Explicitly handle 401 if axios doesn't throw
         setShowAuthModal(true);
-        return;
-      }
-      if (!response.ok) {
+      } else {
         throw new Error('Failed to delete thread');
       }
-
-      const updatedThreads = allThreads.filter((thread) => thread.threadId !== threadIdToDelete);
-      setAllThreads(updatedThreads);
-
-      if (threadIdToDelete === currentThread) {
-        if (updatedThreads.length > 0) {
-          const latestThread = updatedThreads.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
-          setCurrentThread(latestThread.threadId);
-          await changeThread(latestThread.threadId);
-        } else {
-          createNewThread();
-        }
-      } else {
-        await getAllThreads(); // Refresh all threads to ensure consistent state
-      }
-
-      setActiveEllipsis(null);
     } catch (error) {
-      console.error("Error deleting thread:", error);
-      alert("Failed to delete chat. Please try again."); // Consider a custom modal instead of alert()
+      console.error("Error deleting thread:", error.response ? error.response.data : error.message);
+      if (error.response && error.response.status === 401) {
+        setShowAuthModal(true);
+      } else {
+        alert("Failed to delete chat. Please try again."); // Consider a custom modal instead of alert()
+      }
     }
   };
 
@@ -160,7 +173,7 @@ function Sidebar() {
               {activeEllipsis === idx && (
                 <div className="dropdown-menu">
                   <button onClick={(e) => {
-                    e.stopPropagation(); // Prevent parent li click
+                    e.stopPropagation();
                     deleteThread(thread.threadId);
                   }}>Delete</button>
                 </div>

@@ -4,6 +4,7 @@ import './ChatWindow.css';
 import { MyContext } from './MyContext';
 import { AuthContext } from './AuthContext';
 import 'react-loading-skeleton/dist/skeleton.css';
+import axios from 'axios'; // Import axios
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
 
@@ -47,59 +48,61 @@ function ChatWindow() {
     try {
       const threadIdToSend = currentThread || null;
 
-      const response = await fetch(`${API_BASE_URL}/api/chat`, { 
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: userMessage, threadId: threadIdToSend }),
-        credentials: 'include'
+      // Use axios.post for chat messages
+      const response = await axios.post(`${API_BASE_URL}/api/chat`, { messages: userMessage, threadId: threadIdToSend }, {
+        withCredentials: true // Equivalent to credentials: 'include'
       });
 
-      if (response.status === 401) {
-        setShowAuthModal(true);
-        setIsLoading(false);
-        setPrevChats(prev => prev.slice(0, prev.length - 2)); // Remove user message and skeleton
-        return;
-      }
+      // Axios automatically throws for 4xx/5xx, so we handle success here
+      if (response.status === 200) {
+        const data = response.data; // Axios response data is directly in .data
 
-      const data = await response.json();
+        setPrevChats(prev => {
+          const updated = [...prev];
+          const lastIndex = updated.length - 1;
+          if (updated[lastIndex]?.isSkeleton) {
+            updated[lastIndex] = { role: "model", content: data.Answer };
+          }
+          return updated;
+        });
 
-      setPrevChats(prev => {
-        const updated = [...prev];
-        const lastIndex = updated.length - 1;
-        if (updated[lastIndex]?.isSkeleton) {
-          updated[lastIndex] = { role: "model", content: data.Answer };
+        if (data.thread?.threadId && data.thread.threadId !== currentThread) {
+          setCurrentThread(data.thread.threadId);
+          setAllThreads(prev => {
+            const newThreads = [data.thread, ...prev.filter(t => t.threadId !== data.thread.threadId)];
+            return newThreads.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+          });
+        } else if (data.thread) {
+          setAllThreads(prev => {
+            const updatedThreads = prev.map(t =>
+              t.threadId === data.thread.threadId ? { ...t, updatedAt: data.thread.updatedAt } : t
+            );
+            return updatedThreads.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+          });
         }
-        return updated;
-      });
-
-      if (data.thread?.threadId && data.thread.threadId !== currentThread) {
-        setCurrentThread(data.thread.threadId);
-        setAllThreads(prev => {
-          const newThreads = [data.thread, ...prev.filter(t => t.threadId !== data.thread.threadId)];
-          return newThreads.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-        });
-      } else if (data.thread) {
-        setAllThreads(prev => {
-          const updatedThreads = prev.map(t =>
-            t.threadId === data.thread.threadId ? { ...t, updatedAt: data.thread.updatedAt } : t
-          );
-          return updatedThreads.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-        });
+      } else if (response.status === 401) { // Explicitly handle 401 if axios doesn't throw
+        setShowAuthModal(true);
+        setPrevChats(prev => prev.slice(0, prev.length - 2)); // Remove user message and skeleton
       }
 
     } catch (error) {
-      console.error('Error occurred:', error);
-      setPrevChats(prev => {
-        const updated = [...prev];
-        const lastIndex = updated.length - 1;
-        if (updated[lastIndex]?.isSkeleton) {
-          updated[lastIndex] = {
-            role: "model",
-            content: 'Error: Could not get a response. Please try again.'
-          };
-        }
-        return updated;
-      });
+      console.error('Error occurred:', error.response ? error.response.data : error.message);
+      if (error.response && error.response.status === 401) {
+        setShowAuthModal(true);
+        setPrevChats(prev => prev.slice(0, prev.length - 2)); // Remove user message and skeleton
+      } else {
+        setPrevChats(prev => {
+          const updated = [...prev];
+          const lastIndex = updated.length - 1;
+          if (updated[lastIndex]?.isSkeleton) {
+            updated[lastIndex] = {
+              role: "model",
+              content: 'Error: Could not get a response. Please try again.'
+            };
+          }
+          return updated;
+        });
+      }
     } finally {
       setIsLoading(false);
     }
