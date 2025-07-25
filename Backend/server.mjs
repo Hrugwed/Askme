@@ -44,10 +44,19 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        // --- CRITICAL ADDITION HERE ---
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-site in production
     }
 }));
+
+// --- DEBUG LOGS ADDED HERE ---
+app.use((req, res, next) => {
+    console.log('--- Request Received ---');
+    console.log('Request URL:', req.originalUrl);
+    console.log('Session ID (before Passport):', req.sessionID);
+    console.log('Session (before Passport):', req.session);
+    next();
+});
+// --- END DEBUG LOGS ---
 
 
 app.use(passport.initialize());
