@@ -7,6 +7,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import AuthModal from './AuthModal';
 import axios from 'axios'; // Import axios
+import './LoadingSpinner.css'; // Import the new CSS file for the loader
 
 
 // API_BASE_URL will be read from .env.local locally, and from Vercel env vars in deployment
@@ -113,13 +114,12 @@ function App() {
   // This is a brief state before the isAuthenticated check is finalized.
   if (authLoading) {
     return (
-      <div className='App d-flex justify-content-center align-items-center'>
+      <div className='loading-screen'> {/* Using a dedicated class for styling */}
         <div className="dot-pulse-loader">
           <span></span><span></span><span></span>
         </div>
-        <p className="mt-3">Getting things ready...</p>
+        <p className="loading-message">Getting things ready...</p>
       </div>
-
     );
   }
 
