@@ -23,7 +23,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'your_super_secret_session_
 
 
 app.use(cors({
-  origin: 'https://askme-1-u8k2.onrender.com/', 
+  origin: 'https://askme-1-u8k2.onrender.com', 
   credentials: true 
 }));
 
