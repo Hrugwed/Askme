@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 
 import chatRoutes from './routes/chat.mjs';
 import authRoutes from './routes/auth.mjs';
@@ -31,6 +32,7 @@ app.use(cors({
 }));
 
 app.use(express.json()); // For parsing application/json
+app.use(cookieParser());
 
 app.use(session({
     secret: SESSION_SECRET,
@@ -72,6 +74,17 @@ const connectToDatabase = async () => {
         process.exit(1); // Exit process if database connection fails
     }
 };
+
+
+app.get('/debug-session', (req, res) => {
+  res.json({
+    cookies: req.cookies,
+    session: req.session,
+    user: req.user
+  });
+});
+
+
 
 // Start the server
 app.listen(PORT, () => {
