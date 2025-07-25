@@ -5,7 +5,6 @@ import User from '../models/User.mjs';
 
 passport.use(new LocalStrategy(
   async (username, password, done) => {
-    // --- DEBUG LOG ---
     console.log('LocalStrategy: Attempting to authenticate user:', username);
     try {
       const user = await User.findOne({ username: username });
@@ -29,14 +28,12 @@ passport.use(new LocalStrategy(
 
 // Serialize user (what user data to store in the session)
 passport.serializeUser((user, done) => {
-  // --- DEBUG LOG ---
   console.log('Passport.serializeUser: Serializing user ID:', user.id);
   done(null, user.id); // Store only the user ID in the session
 });
 
 // Deserialize user (how to retrieve user data from the session)
 passport.deserializeUser(async (id, done) => {
-  // --- DEBUG LOG ---
   console.log('Passport.deserializeUser: Deserializing user ID:', id);
   try {
     const user = await User.findById(id);
