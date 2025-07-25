@@ -24,7 +24,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET; // IMPORTANT: MUST BE SET IN 
 app.use(cors({
     // Configure origins for all your deployed frontends and local dev
     origin: [
-        'https://askme-6dhh3289n-hrugweds-projects.vercel.app/', // Your primary Vercel frontend URL
+        'https://askme-amber.vercel.app', // Your primary Vercel frontend URL
     ],
     credentials: true, // Essential for sending/receiving cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE'], 
