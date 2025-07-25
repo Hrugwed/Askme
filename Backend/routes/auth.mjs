@@ -45,9 +45,31 @@ router.post('/register', async (req, res) => {
 // @route   POST /api/auth/login
 // @desc    Authenticate user and log in
 // @access  Public
-router.post('/login', passport.authenticate('local'), (req, res) => {
-    // If authentication is successful, passport.authenticate places the user on req.user
-    res.json({ msg: 'Logged in successfully', user: { id: req.user.id, username: req.user.username, email: req.user.email } });
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            // Handle error during authentication (e.g., database error)
+            console.error('Passport Auth Error:', err);
+            return res.status(500).json({ msg: 'Authentication error.' });
+        }
+        if (!user) {
+            // Authentication failed (e.g., incorrect username/password)
+            console.log('Passport Auth Failed: No user found.', info);
+            return res.status(401).json({ msg: info.message || 'Invalid credentials.' });
+        }
+        // If authentication succeeded, manually log in the user
+        // This is crucial: req.logIn establishes the session and triggers Set-Cookie
+        req.logIn(user, (err) => {
+            if (err) {
+                // Handle error during req.logIn (e.g., session issues)
+                console.error('req.logIn Error:', err);
+                return res.status(500).json({ msg: 'Could not log in user after authentication.' });
+            }
+            // User successfully logged in, send success response
+            // The Set-Cookie header should now be sent by express-session
+            res.status(200).json({ msg: 'Logged in successfully', user: { id: user.id, username: user.username, email: user.email } });
+        });
+    })(req, res, next); // This immediately invokes the middleware with req, res, next
 });
 
 // @route   GET /api/auth/logout

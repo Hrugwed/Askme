@@ -1,4 +1,3 @@
-// models/Thread.mjs
 import mongoose from 'mongoose';
 
 const MessageSchema = new mongoose.Schema({
@@ -23,10 +22,10 @@ const ThreadSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    userId: { // Add this field
-        type: mongoose.Schema.Types.ObjectId, // References the User model's _id
-        ref: 'User', // Reference to the User model
-        required: true // A thread must belong to a user
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
     },
     title: {
         type: String,
@@ -43,7 +42,7 @@ const ThreadSchema = new mongoose.Schema({
     }
 });
 
-// Update `updatedAt` on every save
+
 ThreadSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();
