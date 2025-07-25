@@ -24,10 +24,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET; // IMPORTANT: MUST BE SET IN 
 app.use(cors({
     // Configure origins for all your deployed frontends and local dev
     origin: [
-        'https://askme-nine.vercel.app', // Your primary Vercel frontend URL
-        'https://askme-g23zucy8k-hrugweds-projects.vercel.app', // Vercel preview deployments
-        'http://localhost:5173', // Common for Vite dev server
-        'http://localhost:3000'  // If your frontend runs on the same port as backend for some reason
+        'https://askme-6dhh3289n-hrugweds-projects.vercel.app/', // Your primary Vercel frontend URL
     ],
     credentials: true, // Essential for sending/receiving cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE'], 
