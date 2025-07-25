@@ -7,7 +7,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthProvider, AuthContext } from './AuthContext';
 import AuthModal from './AuthModal';
 import axios from 'axios'; // Import axios
-import './LoadingSpinner.css'; // Import the new CSS file for the loader
+
 
 
 // API_BASE_URL will be read from .env.local locally, and from Vercel env vars in deployment
