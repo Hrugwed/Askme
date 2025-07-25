@@ -22,16 +22,18 @@ function App() {
 
   const { isAuthenticated, authLoading, user, logout } = useContext(AuthContext);
 
-  
- useEffect(() => {
+  // Effect to manage AuthModal visibility based on authentication status
+  useEffect(() => {
     if (isAuthenticated) {
-        setShowAuthModal(false);
+      setShowAuthModal(false); // Hide modal if user becomes authenticated
     } else {
-        
-        setShowAuthModal(!authLoading && !isAuthenticated);
+      // Show modal if not authenticated AND initial auth check is complete
+      // This makes the modal pop up automatically if a user lands on the page unauthenticated.
+      setShowAuthModal(!authLoading && !isAuthenticated);
     }
-}, [isAuthenticated, authLoading]);
+  }, [isAuthenticated, authLoading]); // Depend on isAuthenticated and authLoading
 
+  // Effect for initializing chat threads
   useEffect(() => {
     const initializeThread = async () => {
       setInitialLoading(true);
@@ -97,11 +99,11 @@ function App() {
   // --- IMPROVED STYLING FOR AUTH LOADING ---
   if (authLoading) {
     return (
-      <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column' }}>
+      <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column', backgroundColor: '#282c34', color: 'white' }}>
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
-        <p className="mt-3 text-white">Checking authentication status...</p> {/* Added text-white for visibility */}
+        <p className="mt-3">Checking authentication status...</p>
       </div>
     );
   }
@@ -109,10 +111,27 @@ function App() {
   return (
     <div className='App'>
       <MyContext.Provider value={providerValues}>
-        {/* AuthModal is shown based on showAuthModal state */}
-        <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
-        <Sidebar />
-        <ChatWindow />
+        {/* Render AuthModal ONLY if showAuthModal is true */}
+        {showAuthModal && (
+            <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
+        )}
+
+        {/* Conditionally render Sidebar and ChatWindow only if authenticated */}
+        {isAuthenticated ? (
+            <>
+                <Sidebar />
+                <ChatWindow />
+            </>
+        ) : (
+            // Display a message and a button if not authenticated and modal is not shown
+            <div className="text-center p-5 d-flex flex-column justify-content-center align-items-center" style={{ height: '100vh', backgroundColor: '#282c34', color: 'white' }}>
+                <h1 className="mb-4">Welcome to Ask Me!</h1>
+                <p className="lead mb-4">Please sign in or register to start chatting.</p>
+                <button className="btn btn-primary btn-lg" onClick={() => setShowAuthModal(true)}>
+                    Sign In / Register
+                </button>
+            </div>
+        )}
       </MyContext.Provider>
     </div>
   );
