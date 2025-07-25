@@ -12,7 +12,7 @@ import chatRoutes from './routes/chat.mjs';
 import authRoutes from './routes/auth.mjs';
 
 import './utils/passport.mjs';
-app.set('trust proxy', 1); // trust first proxy
+
 
 dotenv.config();
 
@@ -22,6 +22,7 @@ const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGO_URL; 
 const SESSION_SECRET = process.env.SESSION_SECRET; // IMPORTANT: MUST BE SET IN .env for production
 
+app.set('trust proxy', 1); // trust first proxy
 
 app.use(cors({
     // Configure origins for all your deployed frontends and local dev
