@@ -1,9 +1,12 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
 export const AuthContext = createContext();
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+// Ensure API_BASE_URL does NOT have a trailing slash
+// If VITE_API_BASE_URL is 'http://localhost:3000/' it will be trimmed to 'http://localhost:3000'
+// If VITE_API_BASE_URL is 'https://askme-4r17.onrender.com/' it will be trimmed
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, '');
+
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -12,37 +15,47 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         const checkAuthStatus = async () => {
+            console.log('Frontend: Checking authentication status...');
+            const fetchUrl = `${API_BASE_URL}/api/auth/current_user`;
+            console.log('Frontend: Fetching current_user from URL:', fetchUrl); // Added URL logging
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/current_user`, { 
+                const response = await fetch(fetchUrl, { 
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'
                 });
+                console.log('Frontend: current_user response status:', response.status);
                 const data = await response.json();
+                console.log('Frontend: current_user response data:', data);
 
                 if (response.ok && data.user) {
                     setUser(data.user);
                     setIsAuthenticated(true);
+                    console.log('Frontend: User is authenticated.');
                 } else {
                     setUser(null);
                     setIsAuthenticated(false);
+                    console.log('Frontend: User is NOT authenticated.');
                 }
             } catch (error) {
-                console.error('Error checking auth status:', error);
+                console.error('Frontend: Error checking auth status:', error);
                 setUser(null);
                 setIsAuthenticated(false);
             } finally {
                 setAuthLoading(false);
+                console.log('Frontend: Auth status check finished.');
             }
         };
 
         checkAuthStatus();
-    }, []);
+    }, []); // Empty dependency array means this runs once on mount
 
     const login = async (username, password) => {
         setAuthLoading(true);
+        const fetchUrl = `${API_BASE_URL}/api/auth/login`; // Added URL for login
+        console.log('Frontend: Fetching login from URL:', fetchUrl); // Added URL logging
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/login`, { // <--- CHANGED HERE
+            const response = await fetch(fetchUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
@@ -66,8 +79,10 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (username, password, email) => {
         setAuthLoading(true);
+        const fetchUrl = `${API_BASE_URL}/api/auth/register`; // Added URL for register
+        console.log('Frontend: Fetching register from URL:', fetchUrl); // Added URL logging
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/register`, { // <--- CHANGED HERE
+            const response = await fetch(fetchUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, email }),
@@ -91,8 +106,10 @@ export const AuthProvider = ({ children }) => {
 
     const logout = async () => {
         setAuthLoading(true);
+        const fetchUrl = `${API_BASE_URL}/api/auth/logout`; // Added URL for logout
+        console.log('Frontend: Fetching logout from URL:', fetchUrl); // Added URL logging
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/logout`, { // <--- CHANGED HERE
+            const response = await fetch(fetchUrl, {
                 method: 'GET',
                 credentials: 'include'
             });
