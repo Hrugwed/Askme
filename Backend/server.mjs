@@ -12,6 +12,7 @@ import chatRoutes from './routes/chat.mjs';
 import authRoutes from './routes/auth.mjs';
 
 import './utils/passport.mjs';
+app.set('trust proxy', 1); // trust first proxy
 
 dotenv.config();
 
