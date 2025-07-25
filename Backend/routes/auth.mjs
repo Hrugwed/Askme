@@ -47,40 +47,43 @@ router.post('/register', async (req, res) => {
 // @access  Public
 router.post('/login', (req, res, next) => {
     passport.authenticate('local', (err, user, info) => {
-        // --- DEBUG LOG: Passport.authenticate callback triggered ---
         console.log('Passport.authenticate callback triggered.');
 
         if (err) {
-            // Handle error during authentication (e.g., database error)
             console.error('Passport Auth Error (Callback):', err);
             return res.status(500).json({ msg: 'Authentication error.' });
         }
         if (!user) {
-            // Authentication failed (e.g., incorrect username/password)
-            // --- DEBUG LOG: Passport Auth Failed ---
             console.log('Passport Auth Failed (Callback): No user found.', info);
             return res.status(401).json({ msg: info.message || 'Invalid credentials.' });
         }
-        // If authentication succeeded, manually log in the user
-        // This is crucial: req.logIn establishes the session and triggers Set-Cookie
-        // --- DEBUG LOG: req.logIn called ---
+        
         console.log('req.logIn called.');
         req.logIn(user, (err) => {
             if (err) {
-                // Handle error during req.logIn (e.g., session issues)
                 console.error('req.logIn Error:', err);
                 return res.status(500).json({ msg: 'Could not log in user after authentication.' });
             }
-            // --- DEBUG LOG: User successfully logged in and session details ---
+            
             console.log('User successfully logged in (req.logIn success):', user.username);
             console.log('Session ID (after req.logIn):', req.sessionID);
             console.log('Session (after req.logIn):', req.session);
 
-            // User successfully logged in, send success response
-            // The Set-Cookie header should now be sent by express-session
+            // --- CRITICAL ATTEMPT TO FORCE COOKIE ---
+            console.log('Attempting to explicitly set cookie...');
+            res.cookie('connect.sid', req.sessionID, {
+                maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+                domain: '.onrender.com' // Explicitly set domain for cross-subdomain communication if needed
+            });
+            console.log('Explicit cookie set instruction sent.');
+            // --- END CRITICAL ATTEMPT ---
+
             res.status(200).json({ msg: 'Logged in successfully', user: { id: user.id, username: user.username, email: user.email } });
         });
-    })(req, res, next); // This immediately invokes the middleware with req, res, next
+    })(req, res, next);
 });
 
 // @route   GET /api/auth/logout
