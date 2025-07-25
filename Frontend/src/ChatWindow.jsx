@@ -1,35 +1,35 @@
-// src/ChatWindow.jsx
 import { useContext, useState } from 'react';
 import Chat from './Chat';
 import './ChatWindow.css';
 import { MyContext } from './MyContext';
-import { AuthContext } from './AuthContext'; // Import AuthContext
+import { AuthContext } from './AuthContext';
 import 'react-loading-skeleton/dist/skeleton.css';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 function ChatWindow() {
   const { message, setMessage, currentThread, setCurrentThread, setPrevChats, initialLoading, setAllThreads, setShowAuthModal } = useContext(MyContext);
-  const { isAuthenticated, user, logout } = useContext(AuthContext); // Get auth state
+  const { isAuthenticated, user, logout } = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false); // State for user dropdown
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const handleLogout = async () => {
     const result = await logout();
     if (result.success) {
-      // Clear all chat related state on logout
       setPrevChats([]);
       setCurrentThread("");
       setAllThreads([]);
       setMessage("");
       setShowUserDropdown(false);
     } else {
-      alert(result.message); // Or display a more friendly error
+      alert(result.message);
     }
   };
 
   const getReply = async () => {
     if (!message.trim() || isLoading) return;
     if (!isAuthenticated) {
-      setShowAuthModal(true); // Prompt login if not authenticated
+      setShowAuthModal(true);
       return;
     }
 
@@ -47,17 +47,17 @@ function ChatWindow() {
     try {
       const threadIdToSend = currentThread || null;
 
-      const response = await fetch('http://localhost:3000/api/chat', {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: userMessage, threadId: threadIdToSend }),
-        credentials: 'include' // Important for sending cookies
+        credentials: 'include'
       });
 
-      if (response.status === 401) { // If not authenticated after trying to send
+      if (response.status === 401) {
         setShowAuthModal(true);
         setIsLoading(false);
-        setPrevChats(prev => prev.slice(0, prev.length - 2)); // Remove user message and skeleton
+        setPrevChats(prev => prev.slice(0, prev.length - 2));
         return;
       }
 

@@ -1,21 +1,22 @@
-// src/AuthContext.jsx
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
 
 export const AuthContext = createContext();
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null); // Will store user object { id, username, email }
+    const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [authLoading, setAuthLoading] = useState(true); // For initial authentication check
+    const [authLoading, setAuthLoading] = useState(true);
 
     useEffect(() => {
         const checkAuthStatus = async () => {
             try {
-                // This endpoint checks if the session is active on the server
-                const response = await fetch('http://localhost:3000/api/auth/current_user', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/current_user`, { 
                     method: 'GET',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include' // Important for sending cookies
+                    credentials: 'include'
                 });
                 const data = await response.json();
 
@@ -36,12 +37,12 @@ export const AuthProvider = ({ children }) => {
         };
 
         checkAuthStatus();
-    }, []); // Run only once on mount to check initial auth status
+    }, []);
 
     const login = async (username, password) => {
         setAuthLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, { // <--- CHANGED HERE
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }) => {
     const register = async (username, password, email) => {
         setAuthLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/auth/register', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/register`, { // <--- CHANGED HERE
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password, email }),
@@ -91,8 +92,8 @@ export const AuthProvider = ({ children }) => {
     const logout = async () => {
         setAuthLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/auth/logout', {
-                method: 'GET', // Or POST, depending on your backend
+            const response = await fetch(`${API_BASE_URL}/api/auth/logout`, { // <--- CHANGED HERE
+                method: 'GET',
                 credentials: 'include'
             });
             if (response.ok) {

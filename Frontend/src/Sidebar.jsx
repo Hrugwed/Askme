@@ -1,8 +1,9 @@
-// src/Sidebar.jsx
 import "./Sidebar.css";
 import { MyContext } from "./MyContext";
-import { AuthContext } from './AuthContext'; // Import AuthContext
+import { AuthContext } from './AuthContext';
 import { useContext, useEffect, useState } from "react";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 function Sidebar() {
   const {
@@ -13,26 +14,25 @@ function Sidebar() {
     setPrevChats,
     setChat,
     setMessage,
-    setShowAuthModal, // Get setShowAuthModal from context
+    setShowAuthModal,
   } = useContext(MyContext);
 
-  const { isAuthenticated, user, authLoading } = useContext(AuthContext); // Get auth state
+  const { isAuthenticated, user, authLoading } = useContext(AuthContext);
 
   const [activeEllipsis, setActiveEllipsis] = useState(null);
 
-  // Fetch all threads only if authenticated and not loading auth
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
       getAllThreads();
     } else if (!isAuthenticated && !authLoading) {
-      setAllThreads([]); // Clear threads if logged out
+      setAllThreads([]);
     }
-  }, [isAuthenticated, authLoading, currentThread]); // Re-fetch/sort when currentThread changes
+  }, [isAuthenticated, authLoading, currentThread]);
 
   const getAllThreads = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/threads", { credentials: 'include' });
-      if (response.status === 401) { // If session expired or not logged in
+      const response = await fetch(`${API_BASE_URL}/api/threads`, { credentials: 'include' }); 
+      if (response.status === 401) {
         setShowAuthModal(true);
         setAllThreads([]);
         return;
@@ -41,7 +41,7 @@ function Sidebar() {
       setAllThreads(data);
     } catch (error) {
       console.error("Error fetching threads: " + error);
-      setAllThreads([]); // Clear threads on error
+      setAllThreads([]);
     }
   };
 
@@ -54,7 +54,7 @@ function Sidebar() {
     setChat(null);
     setPrevChats([]);
     setCurrentThread("");
-    setActiveEllipsis(null); // Close any open ellipsis menus
+    setActiveEllipsis(null);
   };
 
   const changeThread = async (newThreadId) => {
@@ -63,10 +63,10 @@ function Sidebar() {
       return;
     }
     setCurrentThread(newThreadId);
-    setActiveEllipsis(null); // Close ellipsis menu on thread change
+    setActiveEllipsis(null);
     try {
-      const response = await fetch(`http://localhost:3000/api/threads/${newThreadId}`, { credentials: 'include' });
-      if (response.status === 401) { // If session expired or not logged in
+      const response = await fetch(`${API_BASE_URL}/api/threads/${newThreadId}`, { credentials: 'include' }); // <--- CHANGED HERE
+      if (response.status === 401) {
         setShowAuthModal(true);
         setPrevChats([]);
         setCurrentThread("");
@@ -88,11 +88,11 @@ function Sidebar() {
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3000/api/threads/${threadIdToDelete}`, {
+      const response = await fetch(`${API_BASE_URL}/api/threads/${threadIdToDelete}`, { 
         method: "DELETE",
         credentials: 'include'
       });
-      if (response.status === 401) { // If session expired or not logged in
+      if (response.status === 401) {
         setShowAuthModal(true);
         return;
       }
@@ -112,7 +112,7 @@ function Sidebar() {
           createNewThread();
         }
       } else {
-        await getAllThreads(); // Just refresh the list if a non-active thread was deleted
+        await getAllThreads();
       }
 
       setActiveEllipsis(null);
@@ -170,9 +170,9 @@ function Sidebar() {
         ) : isAuthenticated && !authLoading && allThreads.length === 0 ? (
           <li className="no-chats-message">No chats found. Click "New Chat" to start!</li>
         ) : !isAuthenticated && !authLoading ? (
-            <li className="no-chats-message">Please sign in to see your chats.</li>
+          <li className="no-chats-message">Please sign in to see your chats.</li>
         ) : (
-            <li className="no-chats-message">Loading chats...</li>
+          <li className="no-chats-message">Loading chats...</li>
         )}
       </ul>
 

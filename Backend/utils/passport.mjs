@@ -1,9 +1,8 @@
-// config/passport.mjs
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import User from '../models/User.mjs'; // Adjust path if needed
+import User from '../models/User.mjs'; 
 
-// Local Strategy for username/password authentication
+
 passport.use(new LocalStrategy(
   async (username, password, done) => {
     try {
@@ -15,9 +14,9 @@ passport.use(new LocalStrategy(
       if (!isMatch) {
         return done(null, false, { message: 'Incorrect password.' });
       }
-      return done(null, user); // User authenticated successfully
+      return done(null, user); 
     } catch (err) {
-      return done(err); // Server error
+      return done(err); 
     }
   }
 ));
