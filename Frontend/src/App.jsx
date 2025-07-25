@@ -23,6 +23,7 @@ function App() {
   const { isAuthenticated, authLoading, user, logout } = useContext(AuthContext);
 
   // Effect to manage AuthModal visibility based on authentication status
+  // This will now automatically show the modal if not authenticated after authLoading is false
   useEffect(() => {
     if (isAuthenticated) {
       setShowAuthModal(false); // Hide modal if user becomes authenticated
@@ -81,6 +82,8 @@ function App() {
       }
     };
 
+    // Only run this effect for initializing threads once authLoading is false
+    // and when isAuthenticated changes.
     if (!authLoading) {
       initializeThread();
     }
@@ -96,17 +99,8 @@ function App() {
     setShowAuthModal // Pass setShowAuthModal down to children
   };
 
-  // --- IMPROVED STYLING FOR AUTH LOADING ---
-  if (authLoading) {
-    return (
-      <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column', backgroundColor: '#282c34', color: 'white' }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-        <p className="mt-3">Checking authentication status...</p>
-      </div>
-    );
-  }
+  // Removed the 'if (authLoading)' block entirely.
+  // The UI will now directly render based on isAuthenticated state.
 
   return (
     <div className='App'>
@@ -123,7 +117,8 @@ function App() {
                 <ChatWindow />
             </>
         ) : (
-            // Display a message and a button if not authenticated and modal is not shown
+            // Display a message and a button if not authenticated
+            // This will be the initial view while authLoading is true, and after it's false and not authenticated.
             <div className="text-center p-5 d-flex flex-column justify-content-center align-items-center" style={{ height: '100vh', backgroundColor: '#282c34', color: 'white' }}>
                 <h1 className="mb-4">Welcome to Ask Me!</h1>
                 <p className="lead mb-4">Please sign in or register to start chatting.</p>
