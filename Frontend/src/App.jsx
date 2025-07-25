@@ -51,7 +51,7 @@ function App() {
       try {
         // Use axios.get for fetching threads
         const response = await axios.get(`${API_BASE_URL}/api/threads`, { withCredentials: true });
-        
+
         if (response.status === 200) { // Check for 200 OK status
           const data = response.data; // Axios response data is directly in .data
           setAllThreads(data);
@@ -83,7 +83,7 @@ function App() {
         console.error("Error during initial thread fetch:", err.response ? err.response.data : err.message);
         // Handle 401 specifically if needed, otherwise general error
         if (err.response && err.response.status === 401) {
-            setShowAuthModal(true); // Show auth modal on 401
+          setShowAuthModal(true); // Show auth modal on 401
         }
         setCurrentThread("");
         setPrevChats([]);
@@ -114,11 +114,12 @@ function App() {
   if (authLoading) {
     return (
       <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column', backgroundColor: '#282c34', color: 'white' }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
+        <div className="dot-pulse-loader">
+          <span></span><span></span><span></span>
         </div>
-        <p className="mt-3">Loading application...</p>
+        <p className="mt-3">Getting things ready...</p>
       </div>
+
     );
   }
 
@@ -127,7 +128,7 @@ function App() {
       <MyContext.Provider value={providerValues}>
         {/* Render AuthModal ONLY if showAuthModal is true */}
         {showAuthModal && (
-            <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
+          <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
         )}
 
         {/* Always render Sidebar and ChatWindow. Their content will adapt based on isAuthenticated. */}
