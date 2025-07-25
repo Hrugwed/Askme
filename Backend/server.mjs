@@ -3,9 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import session from 'express-session'; 
+import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import passport from 'passport'; 
+import passport from 'passport';
 
 import chatRoutes from './routes/chat.mjs';
 
@@ -23,30 +23,30 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'your_super_secret_session_
 
 
 app.use(cors({
-  origin: 'https://askme-1-u8k2.onrender.com', 
-  credentials: true 
+    origin: 'https://askme-1-u8k2.onrender.com',
+    credentials: true
 }));
 
 app.use(express.json());
 
 app.use(session({
-    secret: SESSION_SECRET, 
-    resave: false, 
-    saveUninitialized: false, 
-    store: MongoStore.create({
-        mongoUrl: MONGODB_URI, 
-        collectionName: 'sessions',
-        ttl: 14 * 24 * 60 * 60, 
-        autoRemove: 'interval', 
-        autoRemoveInterval: 10 
-    }),
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7, 
-        httpOnly: true, 
-        secure: process.env.NODE_ENV === 'production',
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: MONGODB_URI,
+        collectionName: 'sessions',
+        ttl: 14 * 24 * 60 * 60,
+        autoRemove: 'interval',
+        autoRemoveInterval: 10
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
         // --- CRITICAL ADDITION HERE ---
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-site in production
-    }
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-site in production
+    }
 }));
 
 
@@ -60,29 +60,29 @@ app.use("/api/auth", authRoutes);
 
 
 const connectToDatabase = async () => {
-    try {
-        await mongoose.connect(MONGODB_URI);
-        console.log("Connected to MongoDB successfully.");
-    } catch (error) {
-        console.error("Error connecting to MongoDB:", error);
-        process.exit(1);
-    }
+    try {
+        await mongoose.connect(MONGODB_URI);
+        console.log("Connected to MongoDB successfully.");
+    } catch (error) {
+        console.error("Error connecting to MongoDB:", error);
+        process.exit(1);
+    }
 };
 
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-    console.log("Backend ready to receive requests from frontend.");
-    connectToDatabase(); 
+    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log("Backend ready to receive requests from frontend.");
+    connectToDatabase();
 });
 
 
 app.get('/', (req, res) => {
-    res.send('API is running.');
+    res.send('API is running.');
 });
 
 
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Something broke on the server!');
+    console.error(err.stack);
+    res.status(500).send('Something broke on the server!');
 });
