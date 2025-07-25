@@ -8,7 +8,6 @@ import MongoStore from 'connect-mongo';
 import passport from 'passport';
 
 import chatRoutes from './routes/chat.mjs';
-
 import authRoutes from './routes/auth.mjs';
 
 import './utils/passport.mjs';
@@ -24,7 +23,9 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'your_super_secret_session_
 
 app.use(cors({
     origin: 'https://askme-1-u8k2.onrender.com',
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Ensure all necessary methods are allowed
+    allowedHeaders: ['Content-Type', 'Authorization'] // Ensure necessary headers are allowed
 }));
 
 app.use(express.json());
@@ -36,27 +37,43 @@ app.use(session({
     store: MongoStore.create({
         mongoUrl: MONGODB_URI,
         collectionName: 'sessions',
-        ttl: 14 * 24 * 60 * 60,
+        ttl: 14 * 24 * 60 * 60, // Session TTL (e.g., 14 days)
         autoRemove: 'interval',
-        autoRemoveInterval: 10
+        autoRemoveInterval: 10 // In minutes. Checks every 10 minutes
     }),
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-site in production
+        secure: process.env.NODE_ENV === 'production', // Set to true in production (HTTPS)
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-site cookies in production
     }
 }));
 
-// --- DEBUG LOGS ADDED HERE ---
+// --- CRITICAL DEBUG LOGS: Request and Response Headers ---
+// This middleware will log session details for every incoming request
+// And crucially, it will log all response headers *just before* they are sent by Express.
 app.use((req, res, next) => {
-    console.log('--- Request Received ---');
+    console.log('\n--- Request Received ---');
     console.log('Request URL:', req.originalUrl);
+    console.log('Request Method:', req.method);
     console.log('Session ID (before Passport):', req.sessionID);
     console.log('Session (before Passport):', req.session);
+    
+    // Log response headers just before they are sent
+    res.on('finish', () => {
+        console.log('--- Response Headers Sent by Express ---');
+        console.log('Status Code:', res.statusCode);
+        const headers = res.getHeaders();
+        console.log('All Response Headers:', headers);
+        if (headers['set-cookie']) { // Header names are case-insensitive, but getHeaders returns lowercase keys
+            console.log('Set-Cookie header IS present in Express response!');
+        } else {
+            console.log('Set-Cookie header is NOT present in Express response!');
+        }
+    });
     next();
 });
-// --- END DEBUG LOGS ---
+// --- END CRITICAL DEBUG LOGS ---
 
 
 app.use(passport.initialize());

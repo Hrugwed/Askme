@@ -69,17 +69,19 @@ router.post('/login', (req, res, next) => {
             console.log('Session ID (after req.logIn):', req.sessionID);
             console.log('Session (after req.logIn):', req.session);
 
-            // --- CRITICAL ATTEMPT TO FORCE COOKIE ---
-            console.log('Attempting to explicitly set cookie...');
+            // --- Explicit Cookie Set Attempt (for debugging, removed 'domain' attribute) ---
+            // It's generally best to let express-session handle the domain automatically.
+            // This explicit setting is primarily for diagnosis if express-session fails.
+            console.log('Attempting to explicitly set cookie (debug mode)...');
             res.cookie('connect.sid', req.sessionID, {
                 maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-                domain: '.onrender.com' // Explicitly set domain for cross-subdomain communication if needed
+                // Removed 'domain: .onrender.com' to let browser infer or rely on SameSite=None
             });
             console.log('Explicit cookie set instruction sent.');
-            // --- END CRITICAL ATTEMPT ---
+            // --- END Explicit Cookie Set Attempt ---
 
             res.status(200).json({ msg: 'Logged in successfully', user: { id: user.id, username: user.username, email: user.email } });
         });
