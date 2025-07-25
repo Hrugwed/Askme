@@ -113,7 +113,7 @@ function App() {
   // This is a brief state before the isAuthenticated check is finalized.
   if (authLoading) {
     return (
-      <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column', backgroundColor: '#282c34', color: 'white' }}>
+      <div className='App d-flex justify-content-center align-items-center'>
         <div className="dot-pulse-loader">
           <span></span><span></span><span></span>
         </div>
