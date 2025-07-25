@@ -22,6 +22,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'your_super_secret_session_
 
 
 app.use(cors({
+    // --- UPDATED CORS ORIGIN HERE ---
     origin: [
         'https://askme-1-u8k2.onrender.com', // Keep this for now, if you still have the old Render frontend
         'https://askme-nine.vercel.app', // Your new Vercel frontend URL
