@@ -99,8 +99,18 @@ function App() {
     setShowAuthModal // Pass setShowAuthModal down to children
   };
 
-  // Removed the 'if (authLoading)' block entirely.
-  // The UI will now directly render based on isAuthenticated state.
+  // If authLoading is true, display a simple loading spinner.
+  // This is a brief state before the isAuthenticated check is finalized.
+  if (authLoading) {
+    return (
+      <div className='App d-flex justify-content-center align-items-center' style={{ height: '100vh', flexDirection: 'column', backgroundColor: '#282c34', color: 'white' }}>
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-3">Loading application...</p>
+      </div>
+    );
+  }
 
   return (
     <div className='App'>
@@ -110,23 +120,9 @@ function App() {
             <AuthModal show={showAuthModal} onClose={() => setShowAuthModal(false)} />
         )}
 
-        {/* Conditionally render Sidebar and ChatWindow only if authenticated */}
-        {isAuthenticated ? (
-            <>
-                <Sidebar />
-                <ChatWindow />
-            </>
-        ) : (
-            // Display a message and a button if not authenticated
-            // This will be the initial view while authLoading is true, and after it's false and not authenticated.
-            <div className="text-center p-5 d-flex flex-column justify-content-center align-items-center" style={{ height: '100vh', backgroundColor: '#282c34', color: 'white' }}>
-                <h1 className="mb-4">Welcome to Ask Me!</h1>
-                <p className="lead mb-4">Please sign in or register to start chatting.</p>
-                <button className="btn btn-primary btn-lg" onClick={() => setShowAuthModal(true)}>
-                    Sign In / Register
-                </button>
-            </div>
-        )}
+        {/* Always render Sidebar and ChatWindow. Their content will adapt based on isAuthenticated. */}
+        <Sidebar />
+        <ChatWindow />
       </MyContext.Provider>
     </div>
   );
