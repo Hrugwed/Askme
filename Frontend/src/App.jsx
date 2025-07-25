@@ -118,7 +118,7 @@ function App() {
         <div className="dot-pulse-loader">
           <span></span><span></span><span></span>
         </div>
-        <p className="loading-message">Getting things ready...</p>
+        <p className="loading-message"><h2>WHO ASKED!!!!</h2></p>
       </div>
     );
   }

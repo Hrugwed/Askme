@@ -27,7 +27,7 @@ body{
     align-items: center;
     height: 100vh; /* Full viewport height */
     width: 100vw;  /* Full viewport width */
-    background-color: #282c34; /* Dark background to match app theme */
+    background-color: white; /* Dark background to match app theme */
     color: #ffffff; /* White text color */
     font-family: 'Inter', sans-serif; /* Consistent font */
     position: fixed; /* Ensures it covers the entire screen */
