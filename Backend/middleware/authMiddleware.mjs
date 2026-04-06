@@ -4,7 +4,7 @@ const ensureAuthenticated = (req, res, next) => {
     console.log('Backend: req.isAuthenticated() in middleware:', req.isAuthenticated());
 
     if (req.isAuthenticated()) { 
-        console.log('Backend: User is authenticated in middleware,huhgrwd');
+        console.log('Backend: User is authenticated in middleware,prachi');
         return next(); 
     }
     console.log('Backend: User is NOT authenticated in middleware, sending 401.');
