@@ -39,6 +39,8 @@ export const googleGeminiAiResponse = async (prompt, retries = 3, initialDelayMs
                 contents: [{ role: "user", parts: [{ text: prompt }] }],
             });
 
+            
+
             const response = await result.response;
             const text = await response.text(); // Await the text() method
 
